@@ -1,0 +1,32 @@
+name: Daily Export
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Run the job at midnight UTC every day
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install clickhouse-driver pandas boto3
+
+      - name: Run the export script
+        run: python export_script.py  
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add .
+          git commit -m "Update data for $(date +'%Y-%m-%d')"
+          git push
